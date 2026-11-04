@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { background: #f4f6f9; padding: 20px; }
+    .header {
+      background: #2c3e50;
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .header h1 { font-size: 22px; }
+    button {
+      padding: 10px 20px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover { background: #2980b9; }
+    .btn-delete { background: #e74c3c; padding: 6px 12px; font-size: 13px; }
+    .btn-delete:hover { background: #c0392b; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th { background: #34495e; color: white; }
+    tr:hover { background: #f9f9f9; }
+    .empty { text-align: center; padding: 30px; color: #888; }
+    @media (max-width: 600px) {
+      table, th, td { font-size: 13px; }
+      th, td { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>👨‍💼 Admin Panel - User List</h1>
+    <button onclick="loadUsers()">🔄 Refresh</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Phone</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="userTable">
+      <tr><td colspan="6" class="empty">Loading...</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    async function loadUsers() {
+      const tbody = document.getElementById('userTable');
+      try {
+        const res = await fetch('/api/users');
+        const users = await res.json();
+
+        if (users.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="empty">Koi user nahi mila</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = users.map((u, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${u.name}</td>
+            <td>${u.address}</td>
+            <td>${u.phone}</td>
+            <td>${new Date(u.date).toLocaleString()}</td>
+            <td><button class="btn-delete" onclick="deleteUser('${u.id}')">Delete</button></td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">Error loading data</td></tr>';
+      }
+    }
+
+    async function deleteUser(id) {
+      if (!confirm('Kya aap is user ko delete karna chahte hain?')) return;
+      await fetch('/api/users/' + id, { method: 'DELETE' });
+      loadUsers();
+    }
+
+    loadUsers();
+    setInterval(loadUsers, 10000); // auto-refresh every 10 sec
+  </script>
+</body>
+</html>
