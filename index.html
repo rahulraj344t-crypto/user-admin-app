@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Registration App</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 420px;
+    }
+    h2 { text-align: center; color: #333; margin-bottom: 20px; }
+    label { display: block; margin-bottom: 5px; color: #555; font-weight: bold; }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    input:focus { outline: none; border-color: #667eea; }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover { background: #5568d3; }
+    .msg { text-align: center; margin-top: 15px; font-weight: bold; }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📝 User Registration</h2>
+    <form id="userForm">
+      <label>Name</label>
+      <input type="text" id="name" placeholder="Apna naam likhein" required>
+
+      <label>Address</label>
+      <input type="text" id="address" placeholder="Apna address likhein" required>
+
+      <label>Phone Number</label>
+      <input type="tel" id="phone" placeholder="10 digit phone number" pattern="[0-9]{10}" required>
+
+      <button type="submit">Save</button>
+    </form>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <script>
+    document.getElementById('userForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('msg');
+      const data = {
+        name: document.getElementById('name').value.trim(),
+        address: document.getElementById('address').value.trim(),
+        phone: document.getElementById('phone').value.trim()
+      };
+
+      try {
+        const res = await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (res.ok) {
+          msg.textContent = '✅ Data save ho gaya!';
+          msg.className = 'msg success';
+          document.getElementById('userForm').reset();
+        } else {
+          msg.textContent = '❌ ' + result.error;
+          msg.className = 'msg error';
+        }
+      } catch (err) {
+        msg.textContent = '❌ Server error!';
+        msg.className = 'msg error';
+      }
+    });
+  </script>
+</body>
+</html>
